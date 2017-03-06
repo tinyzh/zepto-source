@@ -122,7 +122,39 @@ var Zepto = (function(){
 	}
 
 	function maybeAddPx(name,value){
-		return 
+		return (typeof value == 'number' && !cssNumber[dasherize(name)]) ? value + 'px' : value
+	}
+
+	// 获取元素默认的display值  使用show、hide之类切换的时候，会先记录默认值，要切换回去的时候，就从缓存里面取
+	function defaultDisplay(nodeName){
+		var element, display;
+		if(!elementDisplay[nodeName]){
+			element = document.createElement(nodeName);
+			document.body.appendChild(element);
+			display = getComputedStyle(element,'').getPropertyValue('display');
+			element.parentNode.removeChild(element);
+
+			display == 'none' && (display = 'block');
+
+			elementDisplay[nodeName] = display; //缓存起来
+		}
+
+		return elementDisplay[nodeName];
+	}
+
+	function children(element){
+		return 'children' in element ? 
+			slice.call(element,children) : 
+			$.map(element.childNodes,function(none){ if(node.nodeType == 1) return node; })
+	}
+
+	function Z(dom,selector){
+		var i, len = dom ? dom.length : 0;
+		for(i = 0; i < len ; i++){
+			this[i] = dom[i]
+		}
+		this.length = len;
+		this.selector = selector || '';
 	}
 
 
