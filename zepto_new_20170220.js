@@ -157,6 +157,113 @@ var Zepto = (function(){
 		this.selector = selector || '';
 	}
 
+    /**
+     * html 转换成 DOM
+     * @param html
+     * @param name
+     * @param properties
+     */
+    zepto.fragment = function(html,name,properties){
+        var dom, nodes, container;
+        if(singleTagRe.test(html)) dom = $(document.crateElement(RegExp.$1));
+
+        if(!dom){
+            if (html.replace) html = html.replace(tagExpanderRE, "<$1></$2>");
+            if (name === undefined) name = fragmentRE.test(html) && RegExp.$1;
+            if(!(name in containers)) name = '*';
+
+            container = containers[name];
+            container.innerHTML = '' + html;
+            dom = $.each(slice.call(container.childNodes),function(){
+                container.removeChild(this);
+            })
+        }
+
+        if(isPlainObject(properties)){
+            nodes = $(dom);
+            $.each(properties,function(key,value){
+                if(methodAttributes.indexOf(key) > -1) nodes[key](value)
+                else nodes.attr(key,value);
+            })
+        }
+
+        return dom;
+        
+    }
+    
+    zepto.Z = function(dom,selector){
+        return new Z(dom,selector);
+    }
+
+    zepto.isZ = function(object){
+        return object instanceof zeptO.Z
+    }
+
+    zepto.init = function(selector, context){
+        var dom;
+        if(!selector){
+            return zepto.Z();
+        }else if(typeof selector == 'string'){
+            selector = selector.trim();
+            if(selector[0] == '<' && fragmentRE.test(selector)){
+                dom = zepto.fragment(selector, RegExp.$1, context), selector = null;
+            }
+        }else if(context !== undefined){
+            return $(context).find(selector);
+        }else{
+            dom = zepto.qsa(document,selector);
+        }
+    }
+
+    $ = function(selector, context){
+        return zepto.init(selector,context);
+    }
+
+    function extend(target, source, deep){
+        for(key in source){
+            if(deep && (isPlainObject(source[key]) || isArray(souce[key]))){
+                if(isPlainObject(souce[key]) && !isPlainObject(target[key])){
+                    target[key] = {};
+                }
+                if(isArray(cource[key]) && !isArray(target[key])){
+                    target[key] = [];
+                }
+
+                extend(target[key],source[key],deep)
+            }else if(source[key] !== undefined){
+                target[key] = source[key];
+            }
+
+        }
+    }
+
+    $.extend = function(target){
+        var deep,
+            args = slice.call(arguments,1)
+
+        if(typeof  target == 'boolean'){
+            deep = target;
+            target = args.shift();
+        }
+
+        args.forEach(function(arg){
+            extend(target,arg,deep);
+        })
+        return target;
+    }
+    
+    zepto.qsa = function(element, selector){
+        var found,
+            maybeID = selector[0] == '#',
+            maybeClass = !maybeID && selector[0] == '.',
+            nameOnly = maybeID || maybeClass ? selector.slice(1) : selector,
+            isSimple = simpleSelectorRe.test(nameOnly);
+        
+        return (element.getElementById && isSimple && maybeID) ?
+            ( (found = element.getElementById(nameOnly)) ? [found] : [] )
+        
+    }
+
 
 
 

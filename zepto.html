@@ -7,11 +7,10 @@
 <body>
 	<script src="zepto.js"></script>
 	<script>
-		function uniq(arr){
-			return arr.filter(function(item,idx){
-				return arr.indexOf(item) == idx
-			})
-		}
+		var reg = /^<(\w+)\s*\/?>(?:<\/\1>|)$/;
+        if(reg.test('<sdfsf>')){
+            console.log(RegExp.$1);
+        }
 
 	</script>
 </body>
